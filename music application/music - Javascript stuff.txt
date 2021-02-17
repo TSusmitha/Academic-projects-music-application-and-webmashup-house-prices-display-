@@ -1,0 +1,97 @@
+// Put your Last.fm API key here
+let api_key = "509db0d264b4fb90d2457257f748e25a";
+
+function sendRequest() {
+    let method = ["artist.getinfo", "artist.gettopalbums"];
+    let artist = encodeURI(document.getElementById("form-input").value);
+    let xhrOne = new XMLHttpRequest();
+    let xhrTwo = new XMLHttpRequest();
+    xhrOne.open("GET", "http://ws.audioscrobbler.com/2.0/?method=" + method[0] + "&artist=" + artist + "&api_key=" + api_key + "&format=json", true);
+    xhrOne.setRequestHeader("Accept", "application/json");
+    xhrOne.onreadystatechange = function () {
+        if (xhrOne.readyState === XMLHttpRequest.DONE && xhrOne.status === 200) {
+            let json = JSON.parse(this.responseText);
+            if (typeof (json.topalbums) != "object") {
+                let name = json.artist.name;
+                let page_link = json.artist.url;
+                let info = json.artist.bio.content;
+                let image = json.artist.image[2];
+                let imageLink = Object.keys(image).map(function (key) {
+                    return [Number(key), image[key]];
+                });
+
+                let imgSource = imageLink[0][1];
+
+                let similar = json.artist.similar.artist
+                let similarFull = "";
+                for (let artistSimilar of similar) {
+                    let list = "<li>" + artistSimilar.name + "</li>"
+                    similarFull = similarFull.concat(list, '\n')
+
+                }
+
+                document.getElementById("name").innerHTML = name
+                document.getElementById("page_link").innerHTML = "<a href=\"" + page_link + "\">" + name + "'s page</a>"
+                document.getElementById("image").innerHTML = "<img src=" + imgSource + " alt=\"\">"
+                document.getElementById("similar").innerHTML = similarFull
+                document.getElementById("info").innerHTML = info
+            }
+
+        }
+    };
+    xhrOne.send(null);
+    xhrTwo.open("GET", "http://ws.audioscrobbler.com/2.0/?method=" + method[1] + "&artist=" + artist + "&api_key=" + api_key + "&format=json", true);
+    xhrTwo.setRequestHeader("Accept", "application/json");
+    xhrTwo.onreadystatechange = function () {
+        if (xhrTwo.readyState === XMLHttpRequest.DONE && xhrTwo.status === 200) {
+            let json = JSON.parse(xhrTwo.responseText)
+            let albumList = json.topalbums.album;
+            let albumHTML = "";
+            for (let album of albumList) {
+                if (album.name != "(null)") {
+                    let list = "<li>" + album.name + "</li>";
+                    albumHTML = albumHTML.concat(list, "\n");
+                }
+            }
+            document.getElementById("top").innerHTML = albumHTML;
+        }
+    }
+    xhrTwo.send(null);
+}
+// }
+
+
+    //     xhrOne.open("GET", "http://ws.audioscrobbler.com/2.0/?method=" + method[1] + "&artist=" + artist + "&api_key=" + api_key + "&format=json", true);
+    //     xhrOne.setRequestHeader("Accept", "application/json");
+    //     xhrOne.onreadystatechange = function () {
+    //         if (this.readyState == 4) {
+    //             let json = JSON.parse(this.responseText
+    //             if (typeof (json.topalbums) == "object")
+    //             }
+    //             // let name = json.artist.name;
+    //             let page_link = json.artist.url;
+    //             let info = json.artist.bio.content;
+    //             let image = json.artist.image[2];
+    //             let imageLink = Object.keys(image).map(function(key) {
+    //                 return [Number(key), image[key]];
+    //               });
+
+    //             let imgSource = imageLink[0][1];
+
+    //             let similar = json.artist.similar.artist
+    //             let similarFull = "";
+    //             for (let artistSimilar of similar){
+    //                 let list = "<li>"+ artistSimilar.name +"</li>"
+    //                 similarFull = similarFull.concat(list, '\n')
+
+    //             }
+
+    //             document.getElementById("name").innerHTML = name
+    //             document.getElementById("page_link").innerHTML = "<a href=\"" + page_link + "\">"+ name +"'s page</a>"
+    //             document.getElementById("image").innerHTML = "<img src="+ imgSource +" alt=\"\">"
+    //             document.getElementById("similar").innerHTML = similarFull
+    //             document.getElementById("info").innerHTML = info
+    //         }
+    //     };
+    //     xhrOne.send(null);
+    // }
